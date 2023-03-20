@@ -1,0 +1,48 @@
+import smtplib
+import os
+import imghdr
+from email.message import EmailMessage
+import base64
+
+# Replace the following values with your email credentials and recipient information
+sender_email = "firdauz.ali@eftech.com.my"
+sender_password = "eftech@202107###"
+receiver_email = "firdauz.ali@eftech.com.my"
+
+# Create the EmailMessage object
+msg = EmailMessage()
+msg['Subject'] = 'Subject of the email'
+msg['From'] = sender_email
+msg['To'] = receiver_email
+msg.set_content('This email contains an image')
+
+# Load the image file and encode it as base64
+image_path = 'Birthday.jpeg'  # Replace with the path to your image file
+with open(image_path, 'rb') as f:
+    image_data = f.read()
+image_b64 = base64.b64encode(image_data).decode()
+
+# Add the image to the email as an HTML content with base64-encoded image data
+msg.add_alternative(f"""\
+<!DOCTYPE html>
+<html>
+    <body>
+        <p>Here is an example image:</p>
+        <img src="data:image/{imghdr.what(None, h=image_data)};base64,{image_b64}">
+    </body>
+</html>
+""", subtype='html')
+
+# Send the email using SMTP
+# with smtplib.SMTP('mail.eftech.com.my', 465) as smtp:
+#     smtp.starttls()
+#     smtp.login(sender_email, sender_password)
+#     smtp.send_message(msg)
+
+smtp_server = 'mail.eftech.com.my'
+smtp_port = 465               
+server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+server.login(sender_email, sender_password)
+msg
+server.sendmail(sender_email, receiver_email, msg.as_string())
+server.quit()
