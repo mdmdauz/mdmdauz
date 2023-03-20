@@ -1,0 +1,95 @@
+import smtplib
+import os
+import openpyxl
+import json
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+from email.mime.base import MIMEBase
+from email import encoders
+
+body = "Dear [Employee Name],\n\nHappy Birthday! We hope that your special day is filled with happiness and joy.\n\nBest regards,\n[Your Company Name]"
+signature = "--\n[Your Company Name]\n[Company Logo]"
+subject = "Birthday Wishes from [Your Company Name]"
+
+workbook = openpyxl.load_workbook('employee_data1.xlsx')
+worksheet = workbook['Test']
+
+for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, values_only=True):
+    employee_name = row[0]
+    employee_email = row[1]
+    employee_birthday = row[2]
+    employee_image = row[3]
+
+smtp_server = 'mail.eftech.com.my'
+smtp_port = 465
+sender_email = 'firdauz.ali@eftech.com.my'
+sender_password = 'eftech@202107###'
+
+server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+server.login(sender_email, sender_password)
+
+message = MIMEMultipart()
+message['From'] = sender_email
+message['To'] = employee_email
+message['Cc'] = 'md.firdauz.ali@gmail.com'
+message['Subject'] = subject
+
+message.attach(MIMEText(body.replace('[Employee Name]', employee_name)))
+with open(employee_image, 'rb') as f:
+    img_data = f.read()
+    image = MIMEImage(img_data, name=os.path.basename(employee_image))
+    message.attach(image)
+
+# message.attach(MIMEText(body.replace('[Employee Name]', employee_name)))
+# with open('employee_image', 'rb') as fp:
+#     img_data = MIMEImage(fp.read())
+#     employee_image.add_header('Content-Disposition', 'inline', filename='employee_image')
+#     message.attach(employee_image)
+
+with open('company_logo.jpeg', 'rb') as f:
+    logo_data = f.read()
+    logo = MIMEImage(logo_data, name='company_logo.jpeg')
+    message.attach(logo)
+    message.attach(MIMEText(signature))
+
+server.sendmail(sender_email, [employee_email, 'md.firdauz.ali@gmail.com'], message.as_string())
+server.quit()
+
+import datetime
+import time
+
+while True:
+    now = datetime.datetime.now()
+    if now.hour == 2 and now.minute == 43:
+        for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, values_only=True):
+            employee_name = row[0]
+            employee_email = row[1]
+            employee_birthday = row[2]
+            employee_image = row[3]
+            
+        if employee_birthday == now.date():
+            
+            file = open("email_credentials.json")
+            email_credentials = json.load(file)
+            sender_email = email_credentials["email"]
+            sender_password = email_credentials["password"] 
+            smtp_server = 'mail.eftech.com.my'
+            smtp_port = 465                       
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+            server.login(sender_email, sender_password)
+            message
+                
+                
+            # if employee_birthday == now.date():
+              
+            #     smtp_server = 'mail.eftech.com.my'
+            #     smtp_port = 465
+            #     sender_email = 'firdauz.ali@eftech.com.my'
+            #     sender_password = 'eftech@202107###'
+
+            #     server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+            #     server.login(sender_email, sender_password)
+
+            #     message
+                
