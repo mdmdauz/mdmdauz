@@ -1,0 +1,58 @@
+import pandas
+import smtplib
+import pwinput
+from datetime import datetime
+from email.mime import multipart, text
+
+# initialize smtp connection
+smtp_server = "mail.eftech.com.my"
+smtp_port = 465
+# sender_email = input("Email\t\t: ")
+# sender_password = pwinput.pwinput(prompt="Password\t: ")
+sender_email = "firdauz.ali@eftech.com.my"
+sender_password = "eftech@202107###"
+server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+try:
+    server.login(sender_email, sender_password)
+except:
+    print("Not able to log into email")
+    exit()
+
+# initialize user data
+dataframe = pandas.read_excel("database.xlsx")
+dataframe = dataframe.set_index("eid", drop=True)
+dataframe['birthdate'] =  pandas.to_datetime(dataframe['birthdate'], format='%d/%m/%Y')
+if dataframe is None or dataframe.empty:
+    print("No data loaded.")
+    exit()
+
+# iterate user data
+for id, row in dataframe.iterrows():
+    # check birtdate
+    today = datetime.now()
+    birthdate = row["birthdate"]
+    if today.month != birthdate.month or today.day != birthdate.day:
+        continue
+
+    # message
+    message = multipart.MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = row["email"]
+    message["Cc"] = "md.firdauz.ali@gmail.com"
+    message["Subject"] = row["subject"]
+
+    # html attachment
+    with open("index.html", "r") as f:
+        html = f.read()
+        attachment = text.MIMEText(html, "html")
+        message.attach(attachment)
+
+    # send
+    server.sendmail(
+        sender_email,
+        [row["email"], "md.firdauz.ali@gmail.com"],
+        message.as_string(),
+    )
+    print(f"sent to {row['email']}")
+
+server.quit()
